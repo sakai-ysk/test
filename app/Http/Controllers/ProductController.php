@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product; // Productモデルを現在のファイルで使用できるようにするための宣言。
 use App\Models\Company; // Companyモデルを現在のファイルで使用できるようにするための宣言。
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -15,9 +16,9 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // $companies = Company::all();
 
-        
+        try {
+
         $search = $request->input('search'); //商品名の値
         $company_id = $request->input('company_id'); //メーカー名の値
 
@@ -31,12 +32,15 @@ class ProductController extends Controller
             $query->where('company_id', $company_id);
         }
 
-        // $products = $query->orderBy('company_id', 'asc')->paginate(30);
         $products = $query->paginate(30);
 
 
         $company = new Company;
         $companies = $company->getLists();
+
+    } catch (\Exception $e) {
+        return back();
+    }
 
 
         return view('products.index', [
@@ -48,29 +52,6 @@ class ProductController extends Controller
 
 
 
-        // if (isset($company_id)) {
-        //     $query->where('company_id', $company_id)->get();
-        // }
-        // if ($request->has('company_id') && $company_id != ('メーカー名')) {
-        //     $query->where('company_id', $company_id)->get();
-        // }
-
-        // if($company_id = $request->company_id){
-        //     $query->where('company_id', 'LIKE', "%{$company_id}%");
-        // }
-        // if($search = $request->has('company_id')) {
-        //     $query->where('company_id')->get();
-        // }
-
-        
-        // $products = Product::all();
-        
-
-        // return view('products.index', ['products' => $products]);←1/2消した
-
-        // $products = Product::all();←検索作る時に消した
-        // //
-        // return view('products.index', compact('products'));←検索作る時に消した
     }
 
     /**
@@ -102,6 +83,10 @@ class ProductController extends Controller
             'img_path' => 'nullable|image|max:2048',
         ]);
         //
+        try {
+            // トランザクションの開始
+            DB::beginTransaction();
+
         // 新しく商品を作ります。そのための情報はリクエストから取得します。
         $product = new Product([
             'product_name' => $request->get('product_name'),
@@ -121,6 +106,12 @@ class ProductController extends Controller
         // 作成したデータベースに新しいレコードとして保存。
         $product->save();
 
+        DB::commit();
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back();
+    }
+
         // 全ての処理が終わったら、商品一覧画面に戻る。
         return redirect('products');
 
@@ -133,7 +124,7 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function show($id)←元々のやつ
+    
     public function show(Product $product)
     {
         return view('products.show', ['product' => $product]);
@@ -146,7 +137,7 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function edit($id)←元々のやつ
+    
     public function edit(Product $product)
     {
         $companies = Company::all();
@@ -162,7 +153,7 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function update(Request $request, $id)←元々のやつ
+    
     public function update(Request $request, Product $product)
     {
         $request->validate([
@@ -170,7 +161,11 @@ class ProductController extends Controller
             'price' => 'required',
             'stock' => 'required',
         ]);
-        //バリデーションによりフォームに未入力項目があればエラーメッセー発生させる（未入力です　など）
+        //バリデーションによりフォームに未入力項目があればエラーメッセー発生させる（未入力ですなど）
+
+        try {
+            // トランザクションの開始
+            DB::beginTransaction();
 
         // 商品の情報を更新。
         $product->product_name = $request->product_name;
@@ -181,6 +176,12 @@ class ProductController extends Controller
         // 更新した商品を保存。
         $product->save();
         // モデルインスタンスである$productに対して行われた変更をデータベースに保存するためのメソッド（機能）。
+
+        DB::commit();
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back();
+    }
 
         // 全ての処理が終わったら、商品一覧画面に戻る。
         return redirect()->route('products.index')
@@ -194,12 +195,17 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function destroy($id)←元々のやつ
+    
     public function destroy(Product $product)
     {
+        try {
         // 商品を削除。
         $product->delete();
         //
+    } catch (\Exception $e) {
+        return back();
+    }
+
         return redirect('/products');
     }
 }

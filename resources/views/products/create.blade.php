@@ -10,8 +10,7 @@
 
                     <div class="card-body">
 
-<!-- <div class="container">
-    <h1 class="mb-4">商品新規登録画面</h1> -->
+
 
     
 

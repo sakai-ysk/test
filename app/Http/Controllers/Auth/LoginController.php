@@ -27,7 +27,7 @@ class LoginController extends Controller
      * @var string
      */
     protected $redirectTo = '/products';
-    // RouteServiceProvider::HOME;←元々イコールのとこにあったやつ
+    
 
     /**
      * Create a new controller instance.

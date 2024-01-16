@@ -12,14 +12,7 @@
             <input type="text" name="search" class="form-control" placeholder="検索キーワード" value="{{ request('search') }}">
         </div>
 
-        <!-- <div class="col-sm-12 col-md-3">
-            <select class="form-select" id="company_id" name="company_id">
-                @foreach($products as $product)
-                    <option value="{{ request('company_id') }}" @selected(old('company_id') == $product)>{{ $product->company->company_name }}</option>
-                @endforeach
-                <option value="" selected="selected">メーカー名</option>
-            </select>
-        </div> -->
+        
         <div class="col-sm-12 col-md-3">
             <select name="company_id" class="form-control" value="{{ $company_id }}">
                 <option value="">メーカー名</option>

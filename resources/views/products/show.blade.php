@@ -9,8 +9,7 @@
                     <div class="card-header"><h2>商品情報詳細画面</h2></div>
 
                     <div class="card-body">
-<!-- <div class="container">
-    <h1 class="mb-4">商品情報詳細画面</h1> -->
+
 
     
 
