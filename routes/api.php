@@ -2,7 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SalesController; //追記する
 
+
+Route::post('/purchase', [SalesController::class, 'purchase'])->name('purchase');
 /*
 |--------------------------------------------------------------------------
 | API Routes

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', function () {
-    // return view('welcome');←元々のやつ
+    
     if (Auth::check()) {
         return redirect()->route('products.index');
     } else {
@@ -24,9 +24,14 @@ Route::get('/', function () {
 
 });
 
+
+
+Route::post('/destroy', [App\Http\Controllers\ProductController::class, 'destroy'])->name('destroy');
+
+
 Auth::routes();
 
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');←元々のやつ
+
 Route::group(['middleware' => 'auth'], function () {
     Route::resource('products', ProductController::class);
 });

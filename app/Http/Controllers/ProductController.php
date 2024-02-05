@@ -6,7 +6,7 @@ use App\Models\Product; // Productモデルを現在のファイルで使用で�
 use App\Models\Company; // Companyモデルを現在のファイルで使用できるようにするための宣言。
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
 class ProductController extends Controller
 {
     /**
@@ -17,11 +17,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
 
-        try {
+        
 
         $search = $request->input('search'); //商品名の値
         $company_id = $request->input('company_id'); //メーカー名の値
-
+log::info($search);
         $query = Product::query();
 
         if($search = $request->search){
@@ -32,15 +32,41 @@ class ProductController extends Controller
             $query->where('company_id', $company_id);
         }
 
+        // 最小価格が指定されている場合、その価格以上の商品をクエリに追加
+        if($min_price = $request->min_price){
+            $query->where('price', '>=', $min_price);
+        }
+    
+        // 最大価格が指定されている場合、その価格以下の商品をクエリに追加
+        if($max_price = $request->max_price){
+            $query->where('price', '<=', $max_price);
+        }
+    
+        // 最小在庫数が指定されている場合、その在庫数以上の商品をクエリに追加
+        if($min_stock = $request->min_stock){
+            $query->where('stock', '>=', $min_stock);
+        }
+    
+        // 最大在庫数が指定されている場合、その在庫数以下の商品をクエリに追加
+        if($max_stock = $request->max_stock){
+            $query->where('stock', '<=', $max_stock);
+        }
+
+        // ソートのパラメータが指定されている場合、そのカラムでソートを行う
+        if($sort = $request->sort){
+            $direction = $request->direction == 'desc' ? 'desc' : 'asc'; // directionがdescでない場合は、デフォルトでascとする
+            // もし $request->direction の値が 'desc' であれば、'desc' を返す。
+            // そうでなければ'asc' を返す
+            $query->orderBy($sort, $direction);// orderBy('カラム名', '並び順')
+        }
+
         $products = $query->paginate(30);
 
 
         $company = new Company;
         $companies = $company->getLists();
 
-    } catch (\Exception $e) {
-        return back();
-    }
+    
 
 
         return view('products.index', [
@@ -196,16 +222,32 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     
-    public function destroy(Product $product)
-    {
+    
+        public function destroy(Request $request) {
+            $input = $request->all();
+        
+//ajaxメソッドから送信されたデータは$requestに格納される
         try {
+        
+        $product = Product::find($input['product']); 
         // 商品を削除。
         $product->delete();
+
+        return response()->json(['success' => true]);
+        
         //
     } catch (\Exception $e) {
-        return back();
+        
+        
+        return response()->json([
+            
+            
+            'success' => false, 'message' => '削除に失敗しました'
+            ]);
+
     }
 
-        return redirect('/products');
+        
+        
     }
 }
